@@ -5,6 +5,16 @@
  * @date 2020 Mar 6
  */
 
+// User define
+#define BIT_0	1
+#define BIT_1	2
+#define BIT_2	4
+#define BIT_3	8
+#define BIT_4	16
+#define BIT_5	32
+#define BIT_6	64
+#define BIT_7	128
+
 
 // MFRC522 Command set
 #define	MFRC522_CMD_IDLE          0x00

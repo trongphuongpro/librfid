@@ -5,14 +5,16 @@ set(TARGET mfrc522)
 #-----------------------------------------------------------------------------#
 
 if (SERIES STREQUAL ATMEGA)
+	# temporarily
 	add_subdirectory($ENV{HOME}/Work/BareMetal/libraries/uart uart)
 	add_library(${TARGET} STATIC src/mfrc522_atmega.c
 							lib/spi_atmega.c)
 
 elseif (SERIES STREQUAL TIVA)
 	add_library(${TARGET} STATIC src/mfrc522_tiva.c
-							lib/spi_tiva.c
-							${TIVAWARE_PATH}/utils/uartstdio.c)
+							lib/spi_tiva.
+							# temporarily
+							${TIVAWARE_PATH} /utils/uartstdio.c)
 
 else()
 	message(">> Failure due to missing SERIES.")
@@ -24,6 +26,7 @@ target_include_directories(${TARGET} PUBLIC include)
 #-----------------------------------------------------------------------------#
 
 if (SERIES STREQUAL ATMEGA)
+	# temporarily
 	target_link_libraries(${TARGET} uart)
 
 	target_compile_options(${TARGET} PUBLIC -mmcu=${MCU}

@@ -17,6 +17,13 @@ extern "C" {
 #include <stdint.h>
 #include <stdbool.h>
 
+
+typedef struct __attribute__((packed)) UID {
+	uint8_t UID[10];
+	uint8_t size;
+} UID_t;
+
+
 /**
  * @brief Initialize MFRC522 Reader.
  *
@@ -34,10 +41,12 @@ extern "C" {
 void tiva_mfrc522_init(uint32_t SPIBase, uint32_t RSTBase, uint32_t RSTPin);
 
 
-void atmega_mfrc522_init(volatile uint8_t *SSPort, uint8_t SSPin, volatile uint8_t *RSTPort, uint8_t RSTpin);
+void atmega_mfrc522_init(volatile uint8_t *SSPort, uint8_t SSPin, volatile uint8_t *RSTPort, uint8_t RSTPin);
 
-uint8_t mfrc522_sendREQA(uint8_t *ATQAbuffer, uint8_t size);
-uint8_t mfrc522_sendWUPA(uint8_t *ATQAbuffer, uint8_t size);
+bool mfrc522_available();
+
+uint8_t mfrc522_getUID(UID_t *uid);
+
 uint8_t mfrc522_sendHaltA();
 
 #ifdef __cplusplus

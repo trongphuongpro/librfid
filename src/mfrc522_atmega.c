@@ -28,6 +28,8 @@ static uint8_t SSPin;
 static volatile uint8_t *RSTPort;
 static uint8_t RSTPin;
 
+static uint8_t ATQA[2];
+
 static void mfrc522_write(uint8_t register, uint8_t data);
 static void mfrc522_writeBuffer(uint8_t reg, const void *buffer, uint16_t size);
 static uint8_t mfrc522_read(uint8_t register);
@@ -52,25 +54,12 @@ static uint8_t mfrc522_transceive(const void *txBuffer,
 								bool checkCRC);
 static uint8_t mfrc522_computeAndCheckCRC(const void *rxBuffer, 
 											uint8_t rxSize, 
-											uint8_t *crc,
+											void *crc,
 											bool *result);
-static uint8_t mfrc522_sendRequestWakeup(uint8_t command,
-										uint8_t *ATQAbuffer,
-										uint8_t size);
-
-void setBitsReg(uint8_t reg, uint8_t mask)
-{
-	uint8_t temp = mfrc522_read(reg);
-	mfrc522_write(reg, temp | mask);
-}
-
-
-void clearBitsReg(uint8_t reg, uint8_t mask)
-{
-	uint8_t temp = mfrc522_read(reg);
-	mfrc522_write(reg, temp & (~mask));
-}
-
+static uint8_t mfrc522_sendRequestWakeup(uint8_t command);
+static uint8_t mfrc522_sendREQA();
+uint8_t mfrc522_sendWUPA();
+ 
 
 void atmega_mfrc522_init(volatile uint8_t *__SSPort, uint8_t __SSPin, volatile uint8_t *__RSTPort, uint8_t __RSTPin) {
 	SSPort = __SSPort;
@@ -105,10 +94,7 @@ void atmega_mfrc522_init(volatile uint8_t *__SSPort, uint8_t __SSPin, volatile u
 	// Configurate internal timer
 	// f_timer = 40kHz
 	mfrc522_write(TModeReg, 0x80);
-	printf("TModeReg: %x\n", mfrc522_read(TModeReg));
-
 	mfrc522_write(TPrescalerReg, 0xA9);
-	printf("TPrescalerReg: %x\n", mfrc522_read(TPrescalerReg));
 
 	// reload every 50ms
 	mfrc522_write(TReloadRegH, 0x07);
@@ -124,8 +110,6 @@ void atmega_mfrc522_init(volatile uint8_t *__SSPort, uint8_t __SSPin, volatile u
 
 	// Turn antenna on
 	mfrc522_enableAntenna();
-
-	//printf(">> Init done\n");
 }
 
 
@@ -149,7 +133,6 @@ void mfrc522_reset() {
 	_delay_ms(50); // Delay ~50ms.
 
 	while (mfrc522_read(CommandReg) & BIT_4) {
-		puts("reset");
 	}
 }
 
@@ -178,15 +161,12 @@ uint8_t mfrc522_command(uint8_t command,
 		mfrc522_setRegister(BitFramingReg, BIT_7, BIT_7);
 	}
 
-	printf("CommandReg: %x\n", mfrc522_read(CommandReg));
-
 	// Wait for the command execution to complete.
 	// Time-out is 50ms, set in function tiva_mfrc522_init().
 	uint8_t irqStatus;
 
 	while (1) {
 		irqStatus = mfrc522_read(ComIrqReg); // Read interrupt bits
-
 
 		if (irqStatus & waitIRq) {
 			break;
@@ -197,11 +177,10 @@ uint8_t mfrc522_command(uint8_t command,
 		}
 	}
 
-	mfrc522_setRegister(BitFramingReg, BIT_7, 0);
+	// Stop transmission
+	//mfrc522_setRegister(BitFramingReg, BIT_7, 0);
 
-	printf("irqStatus: %x\n", irqStatus);
 	uint8_t errorStatus = mfrc522_read(ErrorReg);
-	printf("errorStatus: %x\n", errorStatus);
 
 	// Return STATUS_ERROR for [BufferOvfl, ParityErr and ProtocolErr]
 	if (errorStatus & 0x13) {
@@ -218,7 +197,7 @@ uint8_t mfrc522_command(uint8_t command,
 
 	if (rxBuffer && rxSize) {
 		uint8_t size = mfrc522_read(FIFOLevelReg);
-		printf("size: %d\n", size);
+
 		if (size > *rxSize) {
 			return STATUS_NO_ROOM;
 		}
@@ -229,7 +208,6 @@ uint8_t mfrc522_command(uint8_t command,
 
 		// Read control register for RxLastBits
 		validBits_ = mfrc522_read(ControlReg) & 0x07;
-		printf("validBits_: %d\n", validBits_);
 
 		if (validBits) {
 			*validBits = validBits_;
@@ -282,26 +260,21 @@ uint8_t mfrc522_transceive(const void *txBuffer,
 }
 
 
-uint8_t mfrc522_sendRequestWakeup(uint8_t command,
-									uint8_t *ATQAbuffer,
-									uint8_t size) {
-	// check input conditions
-	if (ATQAbuffer == NULL || size < 2) {
-		return STATUS_NO_ROOM;
-	}
+uint8_t mfrc522_sendRequestWakeup(uint8_t command) {
+	uint8_t ATQA_size = 2;
 
 	mfrc522_setRegister(CollReg, BIT_7, 0); // all received bits will be cleared after a collision
 
 	// using short frame for REQA and WUPA command to RFID card.
 	uint8_t validBits = 7;
-	uint8_t status = mfrc522_transceive(&command, 1, ATQAbuffer, &size, &validBits, false);
+	uint8_t status = mfrc522_transceive(&command, 1, ATQA, &ATQA_size, &validBits, false);
 
 	if (status != STATUS_OK) {
 		return status;
 	}
 
 	// ATQA must be exactly 16 bits.
-	if (size != 2 || validBits != 0) {
+	if (ATQA_size != 2 || validBits != 0) {
 		return STATUS_ERROR;
 	}
 
@@ -309,15 +282,144 @@ uint8_t mfrc522_sendRequestWakeup(uint8_t command,
 }
 
 
-uint8_t mfrc522_sendREQA(uint8_t *ATQAbuffer, uint8_t size) {
-	return mfrc522_sendRequestWakeup(MIFARE_CMD_REQA, ATQAbuffer, size);
+uint8_t mfrc522_sendREQA() {
+	return mfrc522_sendRequestWakeup(MIFARE_CMD_REQA);
 }
 
 
-uint8_t mfrc522_sendWUPA(uint8_t *ATQAbuffer, uint8_t size) {
-	return mfrc522_sendRequestWakeup(MIFARE_CMD_WUPA, ATQAbuffer, size);
+uint8_t mfrc522_sendWUPA() {
+	return mfrc522_sendRequestWakeup(MIFARE_CMD_WUPA);
 }
 
+
+bool mfrc522_available() {
+	uint8_t status = mfrc522_sendREQA();
+	
+	return (status == STATUS_OK);
+}
+
+
+uint8_t mfrc522_select(uint8_t SEL, uint8_t *buffer, uint8_t *SAK) {
+	uint8_t status;
+	uint8_t rxSize = 3;
+	uint8_t txBuffer[9];
+
+	txBuffer[0] = SEL; // SELECT CASCADE LEVEL n
+	txBuffer[1] = 0x70; // NVB (Number of Valid Bits)
+	txBuffer[2] = buffer[0];
+	txBuffer[3] = buffer[1];
+	txBuffer[4] = buffer[2];
+	txBuffer[5] = buffer[3];
+	txBuffer[6] = buffer[0] ^ buffer[1] ^ buffer[2] ^ buffer[3];
+
+	status = mfrc522_computeAndCheckCRC(txBuffer, 7, txBuffer+7, NULL);
+
+	if (status != STATUS_OK) {
+		return status;
+	}
+
+	status = mfrc522_transceive(txBuffer, sizeof(txBuffer), SAK, &rxSize, 0, false);
+
+	// if (rxSize != 3) {
+	//
+	// }
+
+	printf("SAK: %x %x %x\n", SAK[2], SAK[1], SAK[0]);
+
+	return status;
+}
+
+
+// TODO: cascade
+uint8_t mfrc522_anticollision(uint8_t SEL, uint8_t *rxBuffer) {
+	uint8_t status;
+	uint8_t rxSize = 5;
+	uint8_t txBuffer[7];
+
+	txBuffer[0] = SEL; // ANTICOLLSION CASCADE LEVEL n
+	txBuffer[1] = 0x20; // NVB (Number of Valid Bits)
+
+	status = mfrc522_transceive(txBuffer, 2, rxBuffer, &rxSize, NULL, false);
+
+	if (status == STATUS_COLLISION) {
+		uint8_t coll_pos = mfrc522_read(CollReg) & 0x1F;
+		uint8_t counter = 32; // the maximum number of anticollision loops
+
+		while (counter-- == 0) {
+
+			if (coll_pos == 0) {
+				coll_pos = 32;
+			}
+
+			txBuffer[0] = SEL;
+			txBuffer[1] = 0x20 + coll_pos;
+			txBuffer[2] = rxBuffer[0];
+			txBuffer[3] = rxBuffer[1];
+			txBuffer[4] = rxBuffer[2];
+			txBuffer[5] = rxBuffer[3];
+			txBuffer[6] = rxBuffer[0] ^ rxBuffer[1] ^ rxBuffer[2] ^ rxBuffer[3];
+
+			rxSize = 5;
+			status = mfrc522_transceive(txBuffer, sizeof(txBuffer), rxBuffer, &rxSize, NULL, false);
+
+			if (status == STATUS_COLLISION) {
+				status = mfrc522_read(CollReg);
+				coll_pos = status & 0x1F;
+
+				// if collision position is not valid
+				if (status & BIT_5) {
+					return STATUS_COLLISION;
+				}
+			}
+			else {
+				return status;
+			}
+		}
+	}
+
+	return status;
+}
+
+
+uint8_t mfrc522_getUID(UID_t *uid) {
+	uint8_t status = 0;
+	uint8_t cascade_level = 0;
+	uint8_t SAK[3];
+	uint8_t uid_buffer[10];
+	uint8_t max_cascade = (ATQA[0] >> 6);
+
+	// UID size is based on ATQA
+	uid->size = (ATQA[0] >> 6) * 3 + 4;
+
+	mfrc522_setRegister(CollReg, BIT_7, 0); // all received bits will be cleared after a collision
+
+	while (cascade_level <= max_cascade) {
+		switch (cascade_level) {
+			case 0:
+				status = mfrc522_anticollision(MIFARE_CMD_ANTICOLLCL1, uid_buffer);
+
+				if (status != STATUS_OK) {
+					return status;
+				}
+
+				status = mfrc522_select(MIFARE_CMD_SELECTCL1, uid_buffer, SAK);
+
+				if (status != STATUS_OK) {
+					return status;
+				}
+
+				break;
+			case 1:
+				mfrc522_anticollision(MIFARE_CMD_ANTICOLLCL2, uid_buffer);
+				mfrc522_select(MIFARE_CMD_SELECTCL2, uid_buffer, SAK);
+				break;
+
+		}
+		cascade_level++;
+	}
+
+	return status;
+}
 
 uint8_t mfrc522_sendHaltA() {
 	uint8_t buffer[4];
@@ -325,14 +427,13 @@ uint8_t mfrc522_sendHaltA() {
 	buffer[0] = MIFARE_CMD_HALT;
 	buffer[1] = 0x00;
 
-	bool tmp = true;
-	uint8_t status = mfrc522_computeAndCheckCRC(buffer, 2, buffer+2, &tmp);
+	uint8_t status = mfrc522_computeAndCheckCRC(buffer, 2, buffer+2, NULL);
 
 	if (status != STATUS_OK) {
 		return status;
 	}
 
-	status = mfrc522_transceive(buffer, 4, NULL, 0, /* txLastBits = */ 0, /* CRC = */ false);
+	status = mfrc522_transceive(buffer, 4, NULL, 0, /* txLastBits = */ NULL, /* calc CRC = */ false);
 
 	if (status == STATUS_TIMEOUT) 
 		return STATUS_OK;
@@ -344,16 +445,17 @@ uint8_t mfrc522_sendHaltA() {
 }
 
 
-uint8_t mfrc522_computeAndCheckCRC(const void *rxBuffer_, 
-											uint8_t rxSize, 
-											uint8_t *crc,
-											bool *result) {
-	uint8_t *rxBuffer = (uint8_t*)rxBuffer_;
+uint8_t mfrc522_computeAndCheckCRC(const void *__buffer, 
+									uint8_t size, 
+									void *__crc,
+									bool *result) {
+	uint8_t *buffer = (uint8_t*)__buffer;
+	uint8_t *crc = (uint8_t*)__crc;
 
 	mfrc522_write(CommandReg, MFRC522_CMD_IDLE); // cancel current command
 	mfrc522_write(DivIrqReg, 0x04); // clear the CRC interrupt bit
 	mfrc522_setRegister(FIFOLevelReg, BIT_7, BIT_7); // immediately clear the internal FIFO 
-	mfrc522_writeBuffer(FIFODataReg, rxBuffer, rxSize); // Write data to FIFO
+	mfrc522_writeBuffer(FIFODataReg, buffer, size); // Write data to FIFO
 	mfrc522_write(CommandReg, MFRC522_CMD_CALCCRC); // execute command calc CRC
 
 	// waiting for computing CRC
@@ -381,8 +483,10 @@ uint8_t mfrc522_computeAndCheckCRC(const void *rxBuffer_,
 	crc[1] = mfrc522_read(CRCResultRegMSB);
 
 	// verify CRC
-	if ((rxBuffer[rxSize] == crc[0]) && rxBuffer[rxSize+1] == crc[1]) {
-		*result = true;
+	if (result != NULL) {
+		if ((buffer[size] == crc[0]) && buffer[size+1] == crc[1]) {
+			*result = true;
+		}
 	}
 
 	return STATUS_OK;

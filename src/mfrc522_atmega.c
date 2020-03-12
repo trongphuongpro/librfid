@@ -1,5 +1,5 @@
 /**
- * @file mfrc522_tiva.c
+ * @file mfrc522_atmega.c
  * @brief MFRC522 MIFARE RFID reader
  * @author Nguyen Trong Phuong (aka trongphuongpro)
  * @date 2020 Mar 6
@@ -10,18 +10,23 @@
 #include "mfrc522_registers.h"
 #include "mfrc522_status.h"
 
+#include <stdio.h>
 #include <stdlib.h>
-
-#include "driverlib/gpio.h"
-#include "driverlib/sysctl.h"
-#include "utils/uartstdio.h"
-#include "inc/hw_memmap.h"
+#include <string.h>
+#include <stdbool.h>
+#include <avr/io.h>
+#include <util/delay.h>
 
 #include "spi.h"
+#include "uart.h"
 
-static uint32_t SPIBase;
-static uint32_t RSTBase;
-static uint32_t RSTPin;
+#define ACTIVATE()		(*SSPort &= ~(1 << SSPin))
+#define DEACTIVATE()	(*SSPort |= (1 << SSPin))
+
+static volatile uint8_t *SSPort;
+static uint8_t SSPin;
+static volatile uint8_t *RSTPort;
+static uint8_t RSTPin;
 
 static void mfrc522_write(uint8_t register, uint8_t data);
 static void mfrc522_writeBuffer(uint8_t reg, const void *buffer, uint16_t size);
@@ -67,37 +72,43 @@ void clearBitsReg(uint8_t reg, uint8_t mask)
 }
 
 
-void tiva_mfrc522_init(uint32_t __SPIBase, uint32_t __RSTBase, uint32_t __RSTPin) {
-	SPIBase = __SPIBase;
-	RSTBase = __RSTBase;
+void atmega_mfrc522_init(volatile uint8_t *__SSPort, uint8_t __SSPin, volatile uint8_t *__RSTPort, uint8_t __RSTPin) {
+	SSPort = __SSPort;
+	SSPin = __SSPin;
+	RSTPort = __RSTPort;
 	RSTPin = __RSTPin;
 
+	// Config OUTPUT HIGH for SS and RST pin
+	DEACTIVATE();
+	
+	atmega_uart_open(38400);
 
 	// Initialize SPI helper functions
-	tiva_spi_open(SPIBase, MASTER);
+	atmega_spi_open(MASTER);
+	spi_setPrescaler(2);
 
 
 	// VERY IMPORTANT: reset MFRC522 reader.
 	//Read chapter 8.8 MFRC522 Datasheet for detail infomation.
 	// if (GPIOPinRead(RSTBase, RSTPin) == 0) {
-	// 	GPIOPinWrite(RSTBase, RSTPin, RSTPin); // Wake MFRC522 up with hard reset
-	// 	SysCtlDelay(50 * SysCtlClockGet() / 3000); // Delay ~50ms
+	// 	*RSTPort |= (1 << RSTPin); // Wake MFRC522 up with hard reset
+	// 	_delay_ms(50); // Delay ~50ms
 	// }
 	// else { // Using soft reset
 	// 	mfrc522_reset();
 	// }
 
-	GPIOPinWrite(RSTBase, RSTPin, RSTPin); // Wake MFRC522 up with hard reset
-	SysCtlDelay(50 * SysCtlClockGet() / 3000); // Delay ~50ms
+	*RSTPort |= (1 << RSTPin); // Wake MFRC522 up with hard reset
+	_delay_ms(50); // Delay ~50ms
 	mfrc522_reset();
 
 	// Configurate internal timer
 	// f_timer = 40kHz
 	mfrc522_write(TModeReg, 0x80);
-	UARTprintf("TModeReg: %x\n", mfrc522_read(TModeReg));
+	printf("TModeReg: %x\n", mfrc522_read(TModeReg));
 
 	mfrc522_write(TPrescalerReg, 0xA9);
-	UARTprintf("TPrescalerReg: %x\n", mfrc522_read(TPrescalerReg));
+	printf("TPrescalerReg: %x\n", mfrc522_read(TPrescalerReg));
 
 	// reload every 50ms
 	mfrc522_write(TReloadRegH, 0x07);
@@ -114,7 +125,7 @@ void tiva_mfrc522_init(uint32_t __SPIBase, uint32_t __RSTBase, uint32_t __RSTPin
 	// Turn antenna on
 	mfrc522_enableAntenna();
 
-	//UARTprintf(">> Init done\n");
+	//printf(">> Init done\n");
 }
 
 
@@ -135,10 +146,10 @@ void mfrc522_enableAntenna() {
 
 void mfrc522_reset() {
 	mfrc522_write(CommandReg, MFRC522_CMD_SOFTRESET);
-	SysCtlDelay(50 * SysCtlClockGet() / 3000); // Delay ~50ms.
+	_delay_ms(50); // Delay ~50ms.
 
 	while (mfrc522_read(CommandReg) & BIT_4) {
-		// While until the PowerDown bit in CommandReg is cleared.
+		puts("reset");
 	}
 }
 
@@ -164,10 +175,10 @@ uint8_t mfrc522_command(uint8_t command,
 
 	// Start the transmission of data
 	if (command == MFRC522_CMD_TRANSCEIVE) {
-		mfrc522_setRegister(BitFramingReg, BIT_7, BIT_7);	
+		mfrc522_setRegister(BitFramingReg, BIT_7, BIT_7);
 	}
 
-	UARTprintf("CommandReg: %x\n", mfrc522_read(CommandReg));
+	printf("CommandReg: %x\n", mfrc522_read(CommandReg));
 
 	// Wait for the command execution to complete.
 	// Time-out is 50ms, set in function tiva_mfrc522_init().
@@ -188,9 +199,9 @@ uint8_t mfrc522_command(uint8_t command,
 
 	mfrc522_setRegister(BitFramingReg, BIT_7, 0);
 
-	UARTprintf("irqStatus: %x\n", irqStatus);
+	printf("irqStatus: %x\n", irqStatus);
 	uint8_t errorStatus = mfrc522_read(ErrorReg);
-	UARTprintf("errorStatus: %x\n", errorStatus);
+	printf("errorStatus: %x\n", errorStatus);
 
 	// Return STATUS_ERROR for [BufferOvfl, ParityErr and ProtocolErr]
 	if (errorStatus & 0x13) {
@@ -207,7 +218,7 @@ uint8_t mfrc522_command(uint8_t command,
 
 	if (rxBuffer && rxSize) {
 		uint8_t size = mfrc522_read(FIFOLevelReg);
-		UARTprintf("size: %d\n", size);
+		printf("size: %d\n", size);
 		if (size > *rxSize) {
 			return STATUS_NO_ROOM;
 		}
@@ -218,7 +229,7 @@ uint8_t mfrc522_command(uint8_t command,
 
 		// Read control register for RxLastBits
 		validBits_ = mfrc522_read(ControlReg) & 0x07;
-		UARTprintf("validBits_: %d\n", validBits_);
+		printf("validBits_: %d\n", validBits_);
 
 		if (validBits) {
 			*validBits = validBits_;
@@ -385,9 +396,10 @@ void mfrc522_write(uint8_t reg, uint8_t data) {
 	// LSB always = 0.
 	// See chapter 8.1.2 for detail infomation
 	// about write operation.
-
+	ACTIVATE();
 	spi_send((reg << 1) & 0x7E);
 	spi_send(data);
+	DEACTIVATE();
 }
 
 
@@ -397,9 +409,10 @@ void mfrc522_writeBuffer(uint8_t reg, const void *buffer, uint16_t size) {
 	// LSB always = 0.
 	// See chapter 8.1.2 for detail infomation
 	// about write operation.
-
+	ACTIVATE();
 	spi_send((reg << 1) & 0x7E);
 	spi_sendBuffer(buffer, size);
+	DEACTIVATE();
 }
 
 
@@ -409,9 +422,10 @@ uint8_t mfrc522_read(uint8_t reg) {
 	// LSB always = 0.
 	// See chapter 8.1.2 for detail infomation
 	// about read operation.
-
+	ACTIVATE();
 	spi_send(((reg << 1) & 0x7E) | 0x80);
 	uint8_t data = spi_receive();
+	DEACTIVATE();
 
 	return data;
 }
@@ -423,9 +437,10 @@ void mfrc522_readBuffer(uint8_t reg, void *buffer, uint16_t size) {
 	// LSB always = 0.
 	// See chapter 8.1.2 for detail infomation
 	// about read operation.
-
+	ACTIVATE();
 	spi_send(((reg << 1) & 0x7E) | 0x80);
 	spi_receiveBuffer(buffer, size);
+	DEACTIVATE();
 }
 
 

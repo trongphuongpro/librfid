@@ -13,6 +13,10 @@
 extern "C" {
 #endif
 
+#include <stdlib.h>
+#include <stdint.h>
+#include <stdbool.h>
+
 /**
  * @brief Initialize MFRC522 Reader.
  *
@@ -29,6 +33,12 @@ extern "C" {
  */
 void tiva_mfrc522_init(uint32_t SPIBase, uint32_t RSTBase, uint32_t RSTPin);
 
+
+void atmega_mfrc522_init(volatile uint8_t *SSPort, uint8_t SSPin, volatile uint8_t *RSTPort, uint8_t RSTpin);
+
+uint8_t mfrc522_sendREQA(uint8_t *ATQAbuffer, uint8_t size);
+uint8_t mfrc522_sendWUPA(uint8_t *ATQAbuffer, uint8_t size);
+uint8_t mfrc522_sendHaltA();
 
 #ifdef __cplusplus
 }

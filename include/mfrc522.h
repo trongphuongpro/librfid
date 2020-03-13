@@ -21,6 +21,7 @@ extern "C" {
 typedef struct __attribute__((packed)) UID {
 	uint8_t UID[10];
 	uint8_t size;
+	uint8_t SAK;
 } UID_t;
 
 
@@ -45,7 +46,7 @@ void atmega_mfrc522_init(volatile uint8_t *SSPort, uint8_t SSPin, volatile uint8
 
 bool mfrc522_available();
 
-uint8_t mfrc522_getUID(UID_t *uid);
+uint8_t mfrc522_getID(UID_t *uid);
 
 uint8_t mfrc522_sendHaltA();
 

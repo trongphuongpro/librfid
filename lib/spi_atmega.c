@@ -21,7 +21,6 @@ static SPI_DEVICEMODE mode;
 
 static void spi_master_open(void);
 static void spi_slave_open(void);
-static uint8_t spi_transmit_byte(uint8_t data);
 static uint8_t spi_master_receive_byte(void);
 static uint8_t spi_slave_receive_byte(void);
 

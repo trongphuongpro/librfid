@@ -118,6 +118,8 @@ void spi_send(uint8_t data);
 void spi_sendBuffer(const void *buffer, uint16_t len);
 
 
+uint8_t spi_transmit_byte(uint8_t data);
+
 #ifdef __cplusplus
 }
 #endif

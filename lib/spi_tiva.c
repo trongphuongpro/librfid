@@ -26,9 +26,7 @@ void tiva_spi_open(uint32_t base, SPI_DEVICEMODE __mode) {
 }
 
 
-uint8_t spi_transmit_byte(uint8_t data) {
-	//GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_5, 0);
-
+uint8_t spi_transfer_byte(uint8_t data) {
 	SSIDataPut(SSIBase, data);
 
 	while (SSIBusy(SSIBase)) {
@@ -38,13 +36,12 @@ uint8_t spi_transmit_byte(uint8_t data) {
 	uint32_t dump;
 	SSIDataGet(SSIBase, &dump);
 
-	//GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_5, GPIO_PIN_5);
 	return dump;
 }
 
 
 uint8_t spi_master_receive_byte(void) {
-	return spi_transmit_byte(0xFF);
+	return spi_transfer_byte(0xFF);
 }
 
 
@@ -58,7 +55,7 @@ uint8_t spi_slave_receive_byte(void) {
 
 
 void spi_send(uint8_t data) {
-	spi_transmit_byte(data);
+	spi_transfer_byte(data);
 }
 
 

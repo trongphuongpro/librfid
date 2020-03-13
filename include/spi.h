@@ -57,7 +57,7 @@ void tiva_spi_open(uint32_t base, SPI_DEVICEMODE mode);
 
 
 /**
- * @brief Set bit order for SPI transmitting.
+ * @brief Set bit order for SPI transferting.
  * Only for ATmega.
  * @param order MSB or LSB.
  * @return nothing.
@@ -66,7 +66,7 @@ void spi_setBitOrder(SPI_BITORDER order);
 
 
 /**
- * @brief Set data mode for SPI transmitting.
+ * @brief Set data mode for SPI transferting.
  * Only for ATmega.
  * @param mode MODE0, MODE1, MODE2 or MODE3.
  * @return nothing.
@@ -118,7 +118,7 @@ void spi_send(uint8_t data);
 void spi_sendBuffer(const void *buffer, uint16_t len);
 
 
-uint8_t spi_transmit_byte(uint8_t data);
+uint8_t spi_transfer_byte(uint8_t data);
 
 #ifdef __cplusplus
 }

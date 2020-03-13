@@ -101,7 +101,7 @@ void atmega_mfrc522_init(volatile uint8_t *__SSPort, uint8_t __SSPin, volatile u
 	mfrc522_write(TReloadRegL, 0xD0);
 
 
-	// Configurate general setting for transmitting and receiving
+	// Configurate general setting for transferting and receiving
 	// Force a 100% ASK
 	mfrc522_write(TxASKReg, 0x40);
 	// Set CRC preset value to 0x6363, complying to ISO 14443-3 part 6.2.4
@@ -534,7 +534,7 @@ void mfrc522_write(uint8_t reg, uint8_t data) {
 	// MSB = 0 is Write;
 	// Bit 6-1 is Address;
 	// LSB always = 0.
-	// See chapter 8.1.2 for detail infomation
+	// See chapter 8.1.2.3 for detail infomation
 	// about write operation.
 	ACTIVATE();
 	spi_send((reg << 1) & 0x7E);
@@ -547,7 +547,7 @@ uint8_t mfrc522_read(uint8_t reg) {
 	// MSB = 1 is Read;
 	// Bit 6-1 is Address;
 	// LSB always = 0.
-	// See chapter 8.1.2 for detail infomation
+	// See chapter 8.1.2.3 for detail infomation
 	// about read operation.
 	ACTIVATE();
 	spi_send(((reg << 1) & 0x7E) | 0x80);
@@ -562,7 +562,7 @@ void mfrc522_writeFIFO(const void *buffer, uint16_t size) {
 	// MSB = 0 is Write;
 	// Bit 6-1 is Address;
 	// LSB always = 0.
-	// See chapter 8.1.2 for detail infomation
+	// See chapter 8.1.2.2 for detail infomation
 	// about write operation.
 	ACTIVATE();
 	spi_send((FIFODataReg << 1) & 0x7E);
@@ -575,7 +575,7 @@ void mfrc522_readFIFO(void *__buffer, uint16_t size) {
 	// MSB = 1 is Read;
 	// Bit 6-1 is Address;
 	// LSB always = 0.
-	// See chapter 8.1.2 for detail infomation
+	// See chapter 8.1.2.1 for detail infomation
 	// about read operation.
 
 	uint8_t *buffer = (uint8_t*)__buffer;
@@ -585,10 +585,11 @@ void mfrc522_readFIFO(void *__buffer, uint16_t size) {
 	spi_send(address);
 
 	for (uint16_t i = 0; i < size-1; i++) {
-		buffer[i] = spi_transmit_byte(address);
+		buffer[i] = spi_transfer_byte(address);
 	}
 
-	buffer[size-1] = spi_transmit_byte(0x00);
+	// Last byte is receive with 0x00 to STOP receiving.
+	buffer[size-1] = spi_transfer_byte(0x00);
 
 	DEACTIVATE();
 }

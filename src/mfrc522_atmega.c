@@ -77,17 +77,7 @@ void atmega_mfrc522_init(volatile uint8_t *__SSPort, uint8_t __SSPin, volatile u
 	atmega_spi_open(MASTER);
 	spi_setPrescaler(2);
 
-
-	// VERY IMPORTANT: reset MFRC522 reader.
-	//Read chapter 8.8 MFRC522 Datasheet for detail infomation.
-	// if (GPIOPinRead(RSTBase, RSTPin) == 0) {
-	// 	*RSTPort |= (1 << RSTPin); // Wake MFRC522 up with hard reset
-	// 	_delay_ms(50); // Delay ~50ms
-	// }
-	// else { // Using soft reset
-	// 	mfrc522_reset();
-	// }
-
+	// Reset MFRC522 Reader
 	mfrc522_hardReset();
 	mfrc522_softReset();
 
@@ -121,11 +111,6 @@ void mfrc522_enableAntenna() {
 		mfrc522_write(TxControlReg, status | 0x03);
 	}
 }
-
-
-// void mfrc522_disableAntenna() {
-// 	mfrc522_setRegister(TxControlReg, BIT_0 | BIT_1, 0);
-// }
 
 
 void mfrc522_softReset() {
@@ -328,7 +313,6 @@ uint8_t mfrc522_select(uint8_t SEL, uint8_t *buffer, uint8_t *sak_buffer) {
 }
 
 
-// TODO: cascade
 uint8_t mfrc522_anticollision(uint8_t SEL, uint8_t *rxBuffer) {
 	uint8_t status;
 	uint8_t rxSize = 5;
@@ -384,11 +368,10 @@ uint8_t mfrc522_getID(UID_t *uid) {
 	uint8_t sak_buffer[3];
 	uint8_t uid_buffer[15];
 	uint8_t cascade_level = 1;
-	bool is_uid_ready = false;
 
 	mfrc522_setRegister(CollReg, BIT_7, 0); // all received bits will be cleared after a collision
 
-	while (!is_uid_ready) {
+	while (1) {
 		switch (cascade_level) {
 			case 1:
 				status = mfrc522_anticollision(MIFARE_CMD_ANTICOLLCL1, uid_buffer);
@@ -424,7 +407,7 @@ uint8_t mfrc522_getID(UID_t *uid) {
 		}
 
 		if (!(sak_buffer[0] & BIT_2)) {
-			is_uid_ready = true;
+			break;
 		}
 		else {
 			cascade_level++;

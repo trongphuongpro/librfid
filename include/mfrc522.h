@@ -39,7 +39,7 @@ typedef struct __attribute__((packed)) UID {
  *
  * @return none.
  */
-void tiva_mfrc522_init(uint32_t SPIBase, uint32_t RSTBase, uint32_t RSTPin);
+void tiva_mfrc522_init(uint32_t SPIBase, uint32_t SSBase, uint32_t SSPin, uint32_t RSTBase, uint32_t RSTPin);
 
 
 void atmega_mfrc522_init(volatile uint8_t *SSPort, uint8_t SSPin, volatile uint8_t *RSTPort, uint8_t RSTPin);

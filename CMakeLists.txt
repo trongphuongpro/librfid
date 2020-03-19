@@ -12,9 +12,9 @@ if (SERIES STREQUAL ATMEGA)
 
 elseif (SERIES STREQUAL TIVA)
 	add_library(${TARGET} STATIC src/mfrc522_tiva.c
-							lib/spi_tiva.
+							lib/spi_tiva.c
 							# temporarily
-							${TIVAWARE_PATH} /utils/uartstdio.c)
+							${TIVAWARE_PATH}/utils/uartstdio.c)
 
 else()
 	message(">> Failure due to missing SERIES.")

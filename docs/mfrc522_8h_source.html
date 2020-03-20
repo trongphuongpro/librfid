@@ -70,25 +70,59 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 <a href="mfrc522_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160; </div>
-<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="preprocessor">#ifndef __RFID__</span></div>
-<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="preprocessor">#define __RFID__</span></div>
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160; </div>
-<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="preprocessor">#ifdef __cplusplus</span></div>
-<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span> {</div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160; </div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="keywordtype">void</span> <a class="code" href="mfrc522_8h.html#a0eea9197378da9320352fcc3d7a44797">tiva_mfrc522_init</a>(uint32_t SPIBase, uint32_t RSTBase, uint32_t RSTPin);</div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160; </div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160; </div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="preprocessor">#ifdef __cplusplus</span></div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;}</div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160; </div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;<span class="preprocessor">#endif </span><span class="comment">/* __RFID */</span><span class="preprocessor"></span></div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160; </div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;<span class="comment">/**************************** End of File ************************************/</span></div>
+<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160; </div>
+<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160; </div>
+<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="preprocessor">#ifndef __RFID__</span></div>
+<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="preprocessor">#define __RFID__</span></div>
+<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160; </div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="preprocessor">#ifdef __cplusplus</span></div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span> {</div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160; </div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="preprocessor">#include &lt;stdlib.h&gt;</span></div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="preprocessor">#include &lt;stdint.h&gt;</span></div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="preprocessor">#include &lt;stdbool.h&gt;</span></div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160; </div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160; </div>
+<div class="line"><a name="l00021"></a><span class="lineno"><a class="line" href="structUID.html">   21</a></span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span>__attribute__((packed)) <a class="code" href="structUID.html">UID</a> {</div>
+<div class="line"><a name="l00022"></a><span class="lineno"><a class="line" href="structUID.html#ad07c9d946cfaf91e880a84d71a9aff4f">   22</a></span>&#160;    uint8_t <a class="code" href="structUID.html">UID</a>[10]; </div>
+<div class="line"><a name="l00023"></a><span class="lineno"><a class="line" href="structUID.html#a5dd753b3571f9867dc422a68ba677e7d">   23</a></span>&#160;    uint8_t <a class="code" href="structUID.html#a5dd753b3571f9867dc422a68ba677e7d">size</a>; </div>
+<div class="line"><a name="l00024"></a><span class="lineno"><a class="line" href="structUID.html#a509387edf5519315c0f48597f829ea81">   24</a></span>&#160;    uint8_t <a class="code" href="structUID.html#a509387edf5519315c0f48597f829ea81">SAK</a>; </div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;} <a class="code" href="mfrc522_8h.html#a15f8eff6d48de75363c541b36d4dc4df">UID_t</a>;</div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160; </div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160; </div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160; </div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;<span class="keywordtype">void</span> <a class="code" href="mfrc522_8h.html#a82d56b4dc89cbdf7e95d26a64692491f">tiva_mfrc522_init</a>(uint32_t SPIBase, uint32_t SSBase, uint32_t SSPin, uint32_t RSTBase, uint32_t RSTPin);</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160; </div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160; </div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;<span class="keywordtype">void</span> <a class="code" href="mfrc522_8h.html#a556007e7209dfc7bec0af27ce36b2c9f">atmega_mfrc522_init</a>(<span class="keyword">volatile</span> uint8_t *SSPort, uint8_t SSPin, <span class="keyword">volatile</span> uint8_t *RSTPort, uint8_t RSTPin);</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160; </div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160; </div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;<span class="keywordtype">bool</span> <a class="code" href="mfrc522_8h.html#a34d6a99f62973cc099ff3c334d08492b">mfrc522_available</a>();</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160; </div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160; </div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;uint8_t <a class="code" href="mfrc522_8h.html#aa6354bf4285b3239e126d6606be93101">mfrc522_getID</a>(<a class="code" href="structUID.html">UID_t</a> *uid);</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160; </div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160; </div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;uint8_t <a class="code" href="mfrc522_8h.html#a77fe867b565d8559303e99f7d551cf35">mfrc522_sendHaltA</a>();</div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160; </div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;<span class="preprocessor">#ifdef __cplusplus</span></div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;}</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160; </div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;<span class="preprocessor">#endif </span><span class="comment">/* __RFID */</span><span class="preprocessor"></span></div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160; </div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;<span class="comment">/**************************** End of File ************************************/</span></div>
 </div><!-- fragment --></div><!-- contents -->
-<div class="ttc" id="amfrc522_8h_html_a0eea9197378da9320352fcc3d7a44797"><div class="ttname"><a href="mfrc522_8h.html#a0eea9197378da9320352fcc3d7a44797">tiva_mfrc522_init</a></div><div class="ttdeci">void tiva_mfrc522_init(uint32_t SPIBase, uint32_t RSTBase, uint32_t RSTPin)</div><div class="ttdoc">Initialize MFRC522 Reader.</div><div class="ttdef"><b>Definition:</b> mfrc522_tiva.c:23</div></div>
+<div class="ttc" id="amfrc522_8h_html_a15f8eff6d48de75363c541b36d4dc4df"><div class="ttname"><a href="mfrc522_8h.html#a15f8eff6d48de75363c541b36d4dc4df">UID_t</a></div><div class="ttdeci">struct UID UID_t</div><div class="ttdoc">Struct UID_t contains ID array, ID size and SAK of current MIFARE card.</div></div>
+<div class="ttc" id="astructUID_html"><div class="ttname"><a href="structUID.html">UID</a></div><div class="ttdoc">Struct UID_t contains ID array, ID size and SAK of current MIFARE card.</div><div class="ttdef"><b>Definition:</b> mfrc522.h:21</div></div>
+<div class="ttc" id="amfrc522_8h_html_a556007e7209dfc7bec0af27ce36b2c9f"><div class="ttname"><a href="mfrc522_8h.html#a556007e7209dfc7bec0af27ce36b2c9f">atmega_mfrc522_init</a></div><div class="ttdeci">void atmega_mfrc522_init(volatile uint8_t *SSPort, uint8_t SSPin, volatile uint8_t *RSTPort, uint8_t RSTPin)</div><div class="ttdoc">Initialize MFRC522 Reader for ATmega MCUs.</div><div class="ttdef"><b>Definition:</b> mfrc522_atmega.c:111</div></div>
+<div class="ttc" id="amfrc522_8h_html_a77fe867b565d8559303e99f7d551cf35"><div class="ttname"><a href="mfrc522_8h.html#a77fe867b565d8559303e99f7d551cf35">mfrc522_sendHaltA</a></div><div class="ttdeci">uint8_t mfrc522_sendHaltA()</div><div class="ttdoc">Send command HALTA to halt MIFARE card.</div><div class="ttdef"><b>Definition:</b> mfrc522_atmega.c:486</div></div>
+<div class="ttc" id="amfrc522_8h_html_a34d6a99f62973cc099ff3c334d08492b"><div class="ttname"><a href="mfrc522_8h.html#a34d6a99f62973cc099ff3c334d08492b">mfrc522_available</a></div><div class="ttdeci">bool mfrc522_available()</div><div class="ttdoc">Check if new MIFARE card is avaible.</div><div class="ttdef"><b>Definition:</b> mfrc522_atmega.c:332</div></div>
+<div class="ttc" id="amfrc522_8h_html_aa6354bf4285b3239e126d6606be93101"><div class="ttname"><a href="mfrc522_8h.html#aa6354bf4285b3239e126d6606be93101">mfrc522_getID</a></div><div class="ttdeci">uint8_t mfrc522_getID(UID_t *uid)</div><div class="ttdoc">Get card'ID.</div><div class="ttdef"><b>Definition:</b> mfrc522_atmega.c:412</div></div>
+<div class="ttc" id="astructUID_html_a509387edf5519315c0f48597f829ea81"><div class="ttname"><a href="structUID.html#a509387edf5519315c0f48597f829ea81">UID::SAK</a></div><div class="ttdeci">uint8_t SAK</div><div class="ttdoc">1-byte response from SELECT command.</div><div class="ttdef"><b>Definition:</b> mfrc522.h:24</div></div>
+<div class="ttc" id="astructUID_html_a5dd753b3571f9867dc422a68ba677e7d"><div class="ttname"><a href="structUID.html#a5dd753b3571f9867dc422a68ba677e7d">UID::size</a></div><div class="ttdeci">uint8_t size</div><div class="ttdoc">ID size, 4-byte, 7-byte or 10-byte, depends on card's type.</div><div class="ttdef"><b>Definition:</b> mfrc522.h:23</div></div>
+<div class="ttc" id="amfrc522_8h_html_a82d56b4dc89cbdf7e95d26a64692491f"><div class="ttname"><a href="mfrc522_8h.html#a82d56b4dc89cbdf7e95d26a64692491f">tiva_mfrc522_init</a></div><div class="ttdeci">void tiva_mfrc522_init(uint32_t SPIBase, uint32_t SSBase, uint32_t SSPin, uint32_t RSTBase, uint32_t RSTPin)</div><div class="ttdoc">Initialize MFRC522 Reader for Tiva C MCUs.</div><div class="ttdef"><b>Definition:</b> mfrc522_tiva.c:64</div></div>
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by &#160;<a href="http://www.doxygen.org/index.html">

@@ -1,9 +1,8 @@
-/**
- * @file status.h
- * @brief MFRC522 MIFARE RFID reader
- * @author Nguyen Trong Phuong (aka trongphuongpro)
- * @date 2020 Mar 6
- */
+
+//! \file mfrc522_status.h
+//! \brief Status when working with MFRC522 RFID reader
+//! \author Nguyen Trong Phuong (aka trongphuongpro)
+//! \date 2020 Mar 6
 
 
 // Status set
@@ -22,3 +21,5 @@
 #define	STATUS_CHANGE_OK		0x0C
 #define	STATUS_TRANSFER_OK		0x0D
 #define	STATUS_STORE_OK			0x0E
+
+/**************************** End of File ************************************/

@@ -86,4 +86,4 @@ void spi_receiveBuffer(void *buffer, uint16_t len) {
 	}
 }
 
-/* End file */
+/**************************** End of File ************************************/

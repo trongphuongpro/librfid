@@ -8,14 +8,6 @@
 #include <avr/io.h>
 #include "spi.h"
 
-#define SPI_PORT	PORTB
-#define SPI_DDR		DDRB
-
-#define MOSI	3
-#define MISO	4
-#define SCK		5
-#define SS		2
-
 
 static SPI_DEVICEMODE mode;
 
@@ -27,9 +19,9 @@ static uint8_t spi_slave_receive_byte(void);
 
 void spi_master_open(void) {
 	mode = MASTER;
-	SPI_DDR |= (1 << SCK) | (1 << MOSI);
-	SPI_DDR &= ~(1 << MISO);
-	SPI_PORT |= (1 << MISO); // pull-up resistor for MISO pin
+	ATMEGA_SPI_DDR |= (1 << ATMEGA_SCK) | (1 << ATMEGA_MOSI);
+	ATMEGA_SPI_DDR &= ~(1 << ATMEGA_MISO);
+	ATMEGA_SPI_PORT |= (1 << ATMEGA_MISO); // pull-up resistor for MISO pin
 	
 	SPCR = (1 << SPE) | (1 << MSTR) | (1 << SPR1); // data mode 0; Prescale = 64
 }
@@ -37,9 +29,9 @@ void spi_master_open(void) {
 
 void spi_slave_open(void) {
 	mode = SLAVE;
-	SPI_DDR |= (1 << MISO);
-	SPI_DDR &= ~((1 << MOSI) | (1 << SS));
-	SPI_PORT |= (1 << MOSI) | (1 << SS);
+	ATMEGA_SPI_DDR |= (1 << ATMEGA_MISO);
+	ATMEGA_SPI_DDR &= ~((1 << ATMEGA_MOSI) | (1 << ATMEGA_SS));
+	ATMEGA_SPI_PORT |= (1 << ATMEGA_MOSI) | (1 << ATMEGA_SS);
 
 	SPCR = (1 << SPE) | (1 << SPIE); // enable interrupt
 }
@@ -149,8 +141,8 @@ void spi_receiveBuffer(void *buffer, uint16_t len) {
 }
 
 
-/*ISR(SPI_STC_vect) {
+/*ISR(ATMEGA_SPI_STC_vect) {
 	receiveData = SPDR;
 }*/
 
-/* End file */
+/**************************** End of File ************************************/

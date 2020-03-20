@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['tiva_5fmfrc522_5finit_2',['tiva_mfrc522_init',['../mfrc522_8h.html#a0eea9197378da9320352fcc3d7a44797',1,'tiva_mfrc522_init(uint32_t SPIBase, uint32_t RSTBase, uint32_t RSTPin):&#160;mfrc522_tiva.c'],['../mfrc522__tiva_8c.html#a3f14a6e96e3448b9a9db99e59e68cccd',1,'tiva_mfrc522_init(uint32_t __SPIBase, uint32_t __RSTBase, uint32_t __RSTPin):&#160;mfrc522_tiva.c']]]
+  ['library_20for_20mcu_20atmega_20and_20tiva_20c_20communicate_20with_20mifare_20rfid_20cards_2e_2',['Library for MCU ATmega and Tiva C communicate with MIFARE RFID cards.',['../index.html',1,'']]]
 ];

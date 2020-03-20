@@ -15,6 +15,16 @@ extern "C" {
 
 #include <stdint.h>
 
+
+#define ATMEGA_SPI_PORT	PORTB
+#define ATMEGA_SPI_DDR	DDRB
+
+#define ATMEGA_MOSI	3
+#define ATMEGA_MISO	4
+#define ATMEGA_SCK	5
+#define ATMEGA_SS	2
+
+
 /**
  * @brief Device mode: Master or Slave
  */
@@ -118,6 +128,11 @@ void spi_send(uint8_t data);
 void spi_sendBuffer(const void *buffer, uint16_t len);
 
 
+/**
+ * @brief transfer 1 byte to SPI bus.
+ * @param data 1-byte data.
+ * @return 1-byte received data.
+ */
 uint8_t spi_transfer_byte(uint8_t data);
 
 #ifdef __cplusplus
@@ -125,3 +140,5 @@ uint8_t spi_transfer_byte(uint8_t data);
 #endif
 
 #endif /* __SPI__ */
+
+/**************************** End of File ************************************/

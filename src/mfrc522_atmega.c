@@ -1,9 +1,8 @@
-/**
- * @file mfrc522_atmega.c
- * @brief MFRC522 MIFARE RFID reader
- * @author Nguyen Trong Phuong (aka trongphuongpro)
- * @date 2020 Mar 6
- */
+
+//! \file mfrc522_atmega.c
+//! \brief MFRC522 MIFARE RFID reader
+//! \author Nguyen Trong Phuong (aka trongphuongpro)
+//! \date 2020 Mar 6
 
 
 #include "mfrc522.h"
@@ -36,7 +35,19 @@ static void	mfrc522_setRegister(uint8_t reg, uint8_t bits, uint8_t value);
 static void mfrc522_softReset();
 static void mfrc522_hardReset();
 static void mfrc522_enableAntenna();
-//static void mfrc522_disableAntenna();
+
+
+//! \brief Send command to MFRC522 reader.
+//! \param [in] command Command to MFRC522 reader, see MFRC522's datasheet ch. 10.3
+//! \param [in] waitIRq Interrupt request bits.
+//! \param [in] txBuffer Data buffer to be written.
+//! \param [in] txSize The size of data buffer.
+//! \param [out] rxBuffer Received data buffer.
+//! \param [out] rxSize The size of received data buffer.
+//! \param [out] validBits The number of valid bits in the last received byte.
+//! \param [in] checkCRC Require CRC verification or not.
+//! \return 0 if success, > 0 if error has occured.
+//!
 static uint8_t mfrc522_command(uint8_t command,
 								uint8_t waitIRq,
 								const void *txBuffer,
@@ -45,12 +56,32 @@ static uint8_t mfrc522_command(uint8_t command,
 								uint8_t *rxSize,
 								uint8_t *validBits,
 								bool checkCRC);
+
+
+//! \brief Send command TRANSCEIVE to MFRC522 reader.
+//! \param [in] txBuffer Data buffer to be written.
+//! \param [in] txSize The size of data buffer.
+//! \param [out] rxBuffer Received data buffer.
+//! \param [out] rxSize The size of received data buffer.
+//! \param [out] validBits The number of valid bits in the last received byte.
+//! \param [in] checkCRC Require CRC verification or not.
+//! \return 0 if success, > 0 if error has occured.
+//!
 static uint8_t mfrc522_transceive(const void *txBuffer,
 								uint8_t txSize,
 								void *rxBuffer,
 								uint8_t *rxSize,
 								uint8_t *validBits,
 								bool checkCRC);
+
+//! \brief Compute and verify CRC if required.
+//! \param [in] rxBuffer Pointer to data buffer that we need compute CRC.
+//! \param [in] size The size of data buffer, in bytes.
+//! \param [out] crc Pointer to variable containing CRC value.
+//! \param [out] result If CRC value of __buffer is valid, result=true.
+//! pass NULL if do not require verify CRC.
+//! \return 0 if success, > 0 if error has occured.
+//!
 static uint8_t mfrc522_computeAndCheckCRC(const void *rxBuffer, 
 											uint8_t rxSize, 
 											void *crc,
@@ -58,8 +89,23 @@ static uint8_t mfrc522_computeAndCheckCRC(const void *rxBuffer,
 static uint8_t mfrc522_sendRequestWakeup(uint8_t command);
 static uint8_t mfrc522_sendREQA();
 uint8_t mfrc522_sendWUPA();
+
+
+//! \brief Send SELECT command to MIFARE card.
+//! \param cmd MIFARE_CMD_SELECTCL1 or MIFARE_CMD_SELECTCL2.
+//! \param [in] buffer Buffer containing a part of UID return from anticollision()
+//! \param [out] sak_buffer SAK buffer return from MIFARE card.
+//! \return 0 if success, > 0 if error has occured.
+//!
 static uint8_t mfrc522_select(uint8_t cmd, uint8_t *buffer, uint8_t *sak_buffer);
-static uint8_t mfrc522_anticollision(uint8_t cmd, uint8_t *rxBuffer);
+
+
+//! \brief Send ANTICOLLISION command to MIFARE card.
+//! \param cmd MIFARE_CMD_ANTICOLLCL1 or MIFARE_CMD_ANTICOLLCL1.
+//! \param [out] buffer Buffer containing a part of UID return from MIFARE card.
+//! \return 0 if success, > 0 if error has occured.
+//!
+static uint8_t mfrc522_anticollision(uint8_t cmd, uint8_t *buffer);
  
 
 void atmega_mfrc522_init(volatile uint8_t *__SSPort, uint8_t __SSPin, volatile uint8_t *__RSTPort, uint8_t __RSTPin) {

@@ -1,9 +1,8 @@
-/**
- * @file mfrc522_tiva.c
- * @brief MFRC522 MIFARE RFID reader
- * @author Nguyen Trong Phuong (aka trongphuongpro)
- * @date 2020 Mar 6
- */
+
+//! \file mfrc522_tiva.c
+//! \brief MFRC522 MIFARE RFID reader
+//! \author Nguyen Trong Phuong (aka trongphuongpro)
+//! \date 2020 Mar 6
 
 
 #include "mfrc522.h"

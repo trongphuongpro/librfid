@@ -1,9 +1,8 @@
-/**
- * @file mfrc522_registers.h
- * @brief MFRC522 MIFARE RFID reader
- * @author Nguyen Trong Phuong (aka trongphuongpro)
- * @date 2020 Mar 6
- */
+
+//! \file mfrc522_registers.h
+//! \brief List of commands and registers of MFRC522 RFID reader.
+//! \author Nguyen Trong Phuong (aka trongphuongpro)
+//! \date 2020 Mar 6
 
 // User define
 #define BIT_0	1

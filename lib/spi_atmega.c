@@ -1,4 +1,4 @@
-/* 
+/** 
  * @file spi_atmega.c
  * @brief Implementation for SPI communication protocol
  * @author Nguyen Trong Phuong (aka trongphuongpro)

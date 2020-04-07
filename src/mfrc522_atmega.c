@@ -9,15 +9,11 @@
 #include "mfrc522_registers.h"
 #include "mfrc522_status.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
 #include <avr/io.h>
 #include <util/delay.h>
 
 #include "spi.h"
-#include "uart.h"
+
 
 #define ACTIVATE()		(*SSPort &= ~(1 << SSPin))
 #define DEACTIVATE()	(*SSPort |= (1 << SSPin))

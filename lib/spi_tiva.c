@@ -7,11 +7,9 @@
 
 
 #include "spi.h"
+
 #include <stdbool.h>
 #include "driverlib/ssi.h"
-#include "driverlib/gpio.h"
-#include "inc/hw_memmap.h"
-#include "utils/uartstdio.h"
 
 
 static uint32_t SSIBase;

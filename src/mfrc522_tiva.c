@@ -10,11 +10,8 @@
 #include "mfrc522_status.h"
 
 #include <stdlib.h>
-
 #include "driverlib/gpio.h"
 #include "driverlib/sysctl.h"
-#include "utils/uartstdio.h"
-#include "inc/hw_memmap.h"
 
 #include "spi.h"
 

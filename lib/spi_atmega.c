@@ -5,8 +5,10 @@
  * @date 2020 Jan 22
  */
 
-#include <avr/io.h>
+
 #include "spi.h"
+
+#include <avr/io.h>
 
 
 static SPI_DEVICEMODE mode;

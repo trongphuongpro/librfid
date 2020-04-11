@@ -14,6 +14,7 @@ extern "C" {
 
 
 #include <stdint.h>
+#include <stdbool.h>
 
 
 #define ATMEGA_SPI_PORT	PORTB
@@ -25,35 +26,25 @@ extern "C" {
 #define ATMEGA_SS	2
 
 
-/**
- * @brief Device mode: Master or Slave
- */
-typedef enum {MASTER=0, SLAVE} SPI_DEVICEMODE;
+#define TIVA_SPI_MODE0  0
+#define TIVA_SPI_MODE1  2
+#define TIVA_SPI_MODE2  1
+#define TIVA_SPI_MODE3  3
+
+#define ATMEGA_SPI_MODE0  0
+#define ATMEGA_SPI_MODE1  1
+#define ATMEGA_SPI_MODE2  2
+#define ATMEGA_SPI_MODE3  3
+
+#define MASTER  0
+#define SLAVE   1
+
+#define MSB     0
+#define LSB     1
 
 
-/**
- * @brief Data mode: mode 0, mode 1, mode 2 and mode 3.
- */
-typedef enum {MODE0=0, MODE1, MODE2, MODE3} SPI_DATAMODE;
-
-
-/**
- * @brief Trasmittion bit order: MSB or LSB
- */
-typedef enum {MSB=0, LSB} SPI_BITORDER;
-
-
-/**
- * @brief Initialize SPI bus for ATmega
- *
- * Default:
- * Master: data mode 0, MSB First.
- * Slave: data mode 0, MSB First, transfer complete interrupt.
- *
- * @param mode MASTER or SLAVE.
- * @return nothing.
- */
-void atmega_spi_open(SPI_DEVICEMODE mode);
+void atmega_spi_master_init(uint8_t data_mode, uint8_t prescale);
+void atmega_spi_slave_init(uint8_t data_mode);
 
 
 /**
@@ -63,7 +54,14 @@ void atmega_spi_open(SPI_DEVICEMODE mode);
  * @param mode MASTER or SLAVE.
  * @return nothing.
  */
-void tiva_spi_open(uint32_t base, SPI_DEVICEMODE mode);
+void tiva_spi_master_init(uint32_t base, 
+                            uint32_t data_mode, 
+                            uint32_t speed, 
+                            uint8_t data_width);
+
+
+void tiva_spi_slave_init(uint32_t base, uint32_t data_mode, uint8_t data_width);
+
 
 
 /**
@@ -72,7 +70,7 @@ void tiva_spi_open(uint32_t base, SPI_DEVICEMODE mode);
  * @param order MSB or LSB.
  * @return nothing.
  */
-void spi_setBitOrder(SPI_BITORDER order);
+void atmega_spi_setBitOrder(uint8_t order);
 
 
 /**
@@ -81,7 +79,7 @@ void spi_setBitOrder(SPI_BITORDER order);
  * @param mode MODE0, MODE1, MODE2 or MODE3.
  * @return nothing.
  */
-void spi_setDataMode(SPI_DATAMODE mode);
+void atmega_spi_setDataMode(uint8_t mode);
 
 
 /**
@@ -92,7 +90,7 @@ void spi_setDataMode(SPI_DATAMODE mode);
  * @param factor 2,4,8,16,32,64,128.
  * @return nothing.
  */
-void spi_setPrescaler(uint8_t factor);
+void atmega_spi_setPrescaler(uint8_t factor);
 
 
 /**

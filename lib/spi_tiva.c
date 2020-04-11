@@ -9,18 +9,60 @@
 #include "spi.h"
 
 #include <stdbool.h>
+#include "driverlib/sysctl.h"
 #include "driverlib/ssi.h"
 
 
 static uint32_t SSIBase;
 static SPI_DEVICEMODE mode;
 
+static uint8_t spi_master_receive_byte(void);
+static uint8_t spi_slave_receive_byte(void);
 
-void tiva_spi_open(uint32_t base, SPI_DEVICEMODE __mode) {
+
+void tiva_spi_master_init(uint32_t base, 
+							uint32_t data_mode, 
+							uint32_t speed, 
+							uint8_t data_width) 
+{
+	mode = MASTER;
 	SSIBase = base;
-	mode = __mode;
 
+	SSIDisable(SSIBase);
+	SSIConfigSetExpClk(SSIBase, 
+						SysCtlClockGet(), 
+						data_mode,
+						SSI_MODE_MASTER,
+						speed,
+						data_width);
 	SSIEnable(SSIBase);
+
+	// clear FIFO
+	uint32_t tmp;
+	while (SSIDataGetNonBlocking(SSIBase, &tmp));
+}
+
+
+void tiva_spi_slave_init(uint32_t base, 
+						uint32_t data_mode,
+						uint8_t data_width) 
+{
+	// complete later
+	mode = SLAVE;
+	SSIBase = base;
+
+	SSIDisable(SSIBase);
+	SSIConfigSetExpClk(SSIBase, 
+						SysCtlClockGet(), 
+						data_mode,
+						SSI_MODE_SLAVE,
+						1000000,
+						data_width);
+	SSIEnable(SSIBase);
+
+	// clear FIFO
+	uint32_t tmp;
+	while (SSIDataGetNonBlocking(SSIBase, &tmp));
 }
 
 

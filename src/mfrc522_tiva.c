@@ -68,7 +68,7 @@ void tiva_mfrc522_init(uint32_t __SPIBase, uint32_t __SSBase, uint32_t __SSPin, 
 	DEACTIVATE();
 
 	// Initialize SPI helper functions
-	tiva_spi_open(SPIBase, MASTER);
+	tiva_spi_master_init(SPIBase, SPI_MODE0, 1000000, 8);
 
 
 	// VERY IMPORTANT: reset MFRC522 reader.
@@ -106,8 +106,6 @@ void tiva_mfrc522_init(uint32_t __SPIBase, uint32_t __SSBase, uint32_t __SSPin, 
 
 	// Turn antenna on
 	mfrc522_enableAntenna();
-
-	//UARTprintf(">> Init done\n");
 }
 
 

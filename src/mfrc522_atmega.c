@@ -9,6 +9,7 @@
 #include "mfrc522_registers.h"
 #include "mfrc522_status.h"
 
+#include <stdlib.h>
 #include <avr/io.h>
 #include <util/delay.h>
 
@@ -113,11 +114,8 @@ void atmega_mfrc522_init(volatile uint8_t *__SSPort, uint8_t __SSPin, volatile u
 	// Config OUTPUT HIGH for SS and RST pin
 	DEACTIVATE();
 	
-	atmega_uart_open(38400);
-
 	// Initialize SPI helper functions
-	atmega_spi_open(MASTER);
-	spi_setPrescaler(2);
+	atmega_spi_master_init(ATMEGA_SPI_MODE0, /* prescale = */ 2);
 
 	// Reset MFRC522 Reader
 	mfrc522_hardReset();

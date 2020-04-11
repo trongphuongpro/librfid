@@ -15,14 +15,13 @@
 
 #include "spi.h"
 
-#define ACTIVATE()		(GPIOPinWrite(SSBase, SSPin, 0))
-#define DEACTIVATE()	(GPIOPinWrite(SSBase, SSPin, SSPin))
+#define ACTIVATE()		(GPIOPinWrite(SS.base, SS.pin, 0))
+#define DEACTIVATE()	(GPIOPinWrite(SS.base, SS.pin, SS.pin))
 
 static uint32_t SPIBase;
-static uint32_t SSBase;
-static uint32_t SSPin;
-static uint32_t RSTBase;
-static uint32_t RSTPin;
+static PortPin_t SS;
+static PortPin_t RST;
+
 
 static void mfrc522_write(uint8_t register, uint8_t data);
 static void mfrc522_writeFIFO(const void *buffer, uint16_t size);
@@ -58,17 +57,15 @@ static uint8_t mfrc522_select(uint8_t cmd, uint8_t *buffer, uint8_t *sak_buffer)
 static uint8_t mfrc522_anticollision(uint8_t cmd, uint8_t *rxBuffer);
 
 
-void tiva_mfrc522_init(uint32_t __SPIBase, uint32_t __SSBase, uint32_t __SSPin, uint32_t __RSTBase, uint32_t __RSTPin) {
+void tiva_mfrc522_init(uint32_t __SPIBase, PortPin_t __SS, PortPin_t __RST) {
 	SPIBase = __SPIBase;
-	SSBase = __SSBase;
-	SSPin = __SSPin;
-	RSTBase = __RSTBase;
-	RSTPin = __RSTPin;
+	SS = __SS;
+	RST = __RST;
 
 	DEACTIVATE();
 
 	// Initialize SPI helper functions
-	tiva_spi_master_init(SPIBase, SPI_MODE0, 1000000, 8);
+	tiva_spi_master_init(SPIBase, TIVA_SPI_MODE0, 1000000, 8);
 
 
 	// VERY IMPORTANT: reset MFRC522 reader.
@@ -120,7 +117,7 @@ void mfrc522_enableAntenna() {
 
 
 void mfrc522_hardReset() {
-	GPIOPinWrite(RSTBase, RSTPin, RSTPin); // Wake MFRC522 up with hard reset
+	GPIOPinWrite(RST.base, RST.pin, RST.pin); // Wake MFRC522 up with hard reset
 	SysCtlDelay(5 * SysCtlClockGet() / 3000); // Delay ~5ms
 }
 

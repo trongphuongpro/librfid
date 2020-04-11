@@ -15,6 +15,8 @@ extern "C" {
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "utils.h"
+
 
 //! \brief Struct UID_t contains ID array, ID size and SAK of current MIFARE card.
 typedef struct __attribute__((packed)) UID {
@@ -40,7 +42,7 @@ typedef struct __attribute__((packed)) UID {
 //!
 //! \return none.
 //!
-void tiva_mfrc522_init(uint32_t SPIBase, uint32_t SSBase, uint32_t SSPin, uint32_t RSTBase, uint32_t RSTPin);
+void tiva_mfrc522_init(uint32_t SPIBase, PortPin_t SS, PortPin_t RST);
 
 
 //! \brief Initialize MFRC522 Reader for ATmega MCUs.

@@ -14,7 +14,7 @@
 
 
 static uint32_t SSIBase;
-static SPI_DEVICEMODE mode;
+static uint8_t mode;
 
 static uint8_t spi_master_receive_byte(void);
 static uint8_t spi_slave_receive_byte(void);

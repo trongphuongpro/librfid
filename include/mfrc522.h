@@ -15,7 +15,7 @@ extern "C" {
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "utils.h"
+#include "utils_tiva.h"
 
 
 //! \brief Struct UID_t contains ID array, ID size and SAK of current MIFARE card.

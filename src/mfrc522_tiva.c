@@ -331,7 +331,7 @@ uint8_t mfrc522_anticollision(uint8_t SEL, uint8_t *rxBuffer) {
 		uint8_t coll_pos = mfrc522_read(CollReg) & 0x1F;
 		uint8_t counter = 32; // the maximum number of anticollision loops
 
-		while (counter-- == 0) {
+		while (counter--) {
 
 			if (coll_pos == 0) {
 				coll_pos = 32;
